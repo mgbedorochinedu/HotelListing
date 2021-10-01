@@ -21,7 +21,7 @@ namespace HotelListing.Data
                 new Country
                 {
                     Id = 1,
-                    Name = "Migeria",
+                    Name = "Nigeria",
                     ShortName = "NG"
                 },
                 new Country
