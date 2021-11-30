@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using HotelListing.IRepository;
 using HotelListing.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -26,6 +27,7 @@ namespace HotelListing.Controllers
             _mapper = mapper;
         }
 
+        //Get all Hotels
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -44,6 +46,8 @@ namespace HotelListing.Controllers
             }
         }
 
+        //Get Hotel by ID
+        [Authorize]
         [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -54,7 +58,6 @@ namespace HotelListing.Controllers
                 var hotel = await _unitOfWork.Hotels.Get(q => q.Id == id, new List<string> { "Country" });
                 var result = _mapper.Map<HotelDTO>(hotel);
                 return Ok(result);
-
             }
             catch (Exception ex)
             {
@@ -62,6 +65,8 @@ namespace HotelListing.Controllers
                 return StatusCode(500, "Internal Server Error. Please Try Again Later");
             }
         }
+
+
 
     }
 }

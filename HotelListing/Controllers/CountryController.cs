@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using HotelListing.IRepository;
 using HotelListing.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -28,7 +29,7 @@ namespace HotelListing.Controllers
             _mapper = mapper;
         }
 
-        //Get all countries
+        //Get all Countries
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -49,7 +50,7 @@ namespace HotelListing.Controllers
             }
         }
 
-        //Get country by Id
+        //Get Country by ID
         [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -69,5 +70,7 @@ namespace HotelListing.Controllers
 
             }
         }
+
+
     }
 }
