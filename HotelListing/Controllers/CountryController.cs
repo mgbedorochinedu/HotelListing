@@ -2,6 +2,7 @@
 using HotelListing.Data;
 using HotelListing.IRepository;
 using HotelListing.Models;
+using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -32,23 +33,15 @@ namespace HotelListing.Controllers
 
         //Get all Countries
         [HttpGet]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = 60)]
+        [HttpCacheValidation(MustRevalidate = false)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetCountries()
+        public async Task<IActionResult> GetCountries([FromQuery] RequestParams requestParams)
         {
-            try
-            {
-                var countries = await _unitOfWork.Countries.GetAll();
+                var countries = await _unitOfWork.Countries.GetPageList(requestParams);
                 var results = _mapper.Map<IList<CountryDTO>>(countries);
                 return Ok(results);
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Something went wrong in the {nameof(GetCountries)}");
-                return StatusCode(500, "Internal Server Error. Please Try Again Later.");
-
-            }
         }
 
 
@@ -58,19 +51,9 @@ namespace HotelListing.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetCountry(int id)
         {
-            try
-            {
                 var country = await _unitOfWork.Countries.Get(q => q.Id == id, new List<string> { "Hotels" });
                 var result = _mapper.Map<CountryDTO>(country);
                 return Ok(result);
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Something went wrong in the {nameof(GetCountry)}");
-                return StatusCode(500, "Internal Server Error. Please Try Again Later.");
-
-            }
         }
 
 
@@ -118,8 +101,6 @@ namespace HotelListing.Controllers
                 return BadRequest(ModelState);
             }
 
-            try
-            {
                 var country = await _unitOfWork.Countries.Get(q => q.Id == id);
 
                 if (country == null)
@@ -133,12 +114,6 @@ namespace HotelListing.Controllers
                 await _unitOfWork.Save();
 
                 return NoContent();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Something went wrong in the {nameof(UpdateCountry)}");
-                return StatusCode(500, "Internal Server Error. Please Try Again Later");
-            }
         }
 
 
@@ -156,8 +131,6 @@ namespace HotelListing.Controllers
                 return BadRequest();
             }
 
-            try
-            {
                 var country = await _unitOfWork.Countries.Get(q => q.Id == id);
                 if (country == null)
                 {
@@ -169,14 +142,7 @@ namespace HotelListing.Controllers
                 await _unitOfWork.Save();
 
                 return NoContent();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Something went wrong in the {nameof(DeleteCountry)}");
-                return StatusCode(500, "Internal Server Error. Please Try Again Later");
-            }
         }
-
 
     }
 }

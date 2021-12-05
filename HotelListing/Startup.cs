@@ -1,3 +1,4 @@
+using AspNetCoreRateLimit;
 using HotelListing.Configurations;
 using HotelListing.Data;
 using HotelListing.IRepository;
@@ -38,10 +39,12 @@ namespace HotelListing
             );
 
 
+
+            services.ConfigureHttpCacheHeaders();
+
             services.AddAuthentication();
             services.ConfigureIdentity();
             services.ConfigureJWT(Configuration);
-
 
             services.AddCors(option => {
                 option.AddPolicy("AllowAll", builder =>
@@ -88,7 +91,7 @@ namespace HotelListing
                     {securityScheme, new string[] { }}
                 });
 
-                // add Basic Authentication
+                //Add Basic Authentication
                 var basicSecurityScheme = new OpenApiSecurityScheme
                 {
                     Type = SecuritySchemeType.Http,
@@ -104,8 +107,16 @@ namespace HotelListing
             });
 
 
-            services.AddControllers().AddNewtonsoftJson(options =>
-              options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore); 
+            services.AddControllers(config => {
+                config.CacheProfiles.Add("120SecondsDuration", new CacheProfile
+                {
+                    Duration = 120
+                });
+            }).AddNewtonsoftJson(options =>
+              options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+
+
+            services.ConfigureVersioning();
         }
 
 
@@ -120,9 +131,15 @@ namespace HotelListing
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "HotelListing v1"));
 
+            app.ConfigureExceptionHandler();
+
             app.UseHttpsRedirection();
 
             app.UseCors("AllowAll");
+
+            app.UseResponseCaching();
+
+            app.UseHttpCacheHeaders();
 
             app.UseRouting();
 
