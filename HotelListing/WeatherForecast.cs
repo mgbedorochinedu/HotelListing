@@ -50,7 +50,7 @@ namespace HotelListing
 //}
 
 
-//......................................................
+//...............
 //Update Staff User - Controller
 
 //[HttpPost("update/staff-user-info/{id:int}")]
@@ -71,6 +71,68 @@ namespace HotelListing
 //        return BadRequest(StandardResponse.BadRequest("Error occured", ex.Message)); ;
 //    }
 
+//}
+
+
+//.....................................................................................................................
+//Fetch All Staff Loan History
+
+//public async Task<IEnumerable<LoanAppHistoryDto>> GetAllStaffLoanHistory(string username)
+//{
+
+//    try
+//    {
+//        var staffLoans = await _db.LoanApplications.Include(x => x.StaffUser)
+//            .Where((u => u.StaffUser.Username == username)).ToListAsync();
+
+
+//        if (staffLoans.Count <= 0)
+//        {
+//            throw new Exception("Staff loan not found!");
+//        }
+
+//        var loanHistoryList = new List<LoanAppHistoryDto>();
+
+//        foreach (var loanHistory in staffLoans)
+//        {
+//            var loan = new LoanAppHistoryDto
+//            {
+//                LoanAmount = loanHistory.LoanAmount,
+//                LoanRepayment = loanHistory.LoanRepayment,
+//                LoanType = loanHistory.LoanType,
+//                MaturityDateOfLoan = loanHistory.MaturityDateOfLoan
+//            };
+
+//            loanHistoryList.Add(loan);
+//        }
+
+//        return loanHistoryList;
+//    }
+//    catch (Exception e)
+//    {
+//        throw new Exception("Something went wrong!");
+//    }
+//}
+
+//............................ Controller
+//[Authorize(AuthenticationSchemes = "Bearer")]
+//[HttpGet("fetch-staff-loan-history")]
+//[ProducesResponseType(typeof(ResponseModel), 200)]
+//[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+//public async Task<IActionResult> FetchStaffLoanHistory()
+//{
+//    var identity = HttpContext.User.Identity as ClaimsIdentity;
+//    if (identity == null)
+//    {
+//        throw new UnauthorizedAccessException("User Unauthorized");
+//    }
+//    var tokenUser = identity.FindFirst("userName").Value;
+
+//    var staffLoanHistory = await _loan.GetAllStaffLoanHistory(tokenUser);
+//    if (staffLoanHistory != null)
+//        return Ok(StandardResponse.Ok("Successfully fetch loan history", staffLoanHistory));
+//    else
+//        return BadRequest(StandardResponse.BadRequest("Loan history not found"));
 //}
 
 
