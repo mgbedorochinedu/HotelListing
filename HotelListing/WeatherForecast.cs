@@ -74,8 +74,9 @@ namespace HotelListing
 //}
 
 
+
 //.....................................................................................................................
-//Fetch All Staff Loan History
+//Fetch All Staff Loan History - Service
 
 //public async Task<IEnumerable<LoanAppHistoryDto>> GetAllStaffLoanHistory(string username)
 //{
@@ -135,5 +136,237 @@ namespace HotelListing
 //        return BadRequest(StandardResponse.BadRequest("Loan history not found"));
 //}
 
+
+
+//..................................................................................................................
+
+
+//Get staff users either by emailAddress or accountNumber - SERVICE
+
+//public async Task<IEnumerable<StaffUser>> GetStaffUsers(string emailAddress, string accountNumber)
+//{
+//    try
+//    {
+//        IQueryable<StaffUser> staffUsersQuery = _db.StaffUsers;
+//        if (!string.IsNullOrEmpty(emailAddress))
+//        {
+//            staffUsersQuery = staffUsersQuery.Where(x => x.Email.ToLower().Trim() == emailAddress.ToLower().Trim());
+
+//        }
+
+//        if (!string.IsNullOrEmpty(accountNumber))
+//        {
+//            staffUsersQuery = staffUsersQuery.Where(x => x.StaffAccountNumber.Trim() == accountNumber.Trim());
+//        }
+
+//        var staffUsers = await staffUsersQuery.ToListAsync();
+
+
+//        if (staffUsers == null || !staffUsers.Any())
+//        {
+//            throw new Exception("Staff user not found");
+//        }
+
+//        return staffUsers;
+
+//    }
+//    catch (Exception ex)
+//    {
+//        throw new Exception("An error occur");
+//    }
+//}
+//.......................................................
+//Get Staff User - CONTROLLER
+
+//[HttpGet("get-staff-users")]
+//[ProducesResponseType(typeof(ResponseModel), 200)]
+//[ProducesResponseType(typeof(ResponseModel), 401)]
+//public async Task<IActionResult> GetStaffUsers([FromQuery] string emailAddress, [FromQuery] string accountNumber)
+//{
+//    var staffUsers = await _adminApproval.GetStaffUsers(emailAddress, accountNumber);
+
+//    return Ok(StandardResponse.Ok("Fetched successfully", staffUsers));
+//}
+
+
+//...............................................................................................................
+
+//Loan approval/Get Staff loan Approval/Get list of loan status - SERVICE
+
+//public async Task UpdateLoanApprovalStatus(LoanApprovalStatusTrackerModel loanApproval, string username)
+//{
+
+//    try
+//    {
+//        //Get the staff loan to approve
+//        var staffLoan = await _db.LoanApplications.FirstOrDefaultAsync(a => a.Id == loanApproval.LoanApplicationId);
+
+//        if (staffLoan != null)
+//        {
+//            staffLoan.ApprovalStatus = loanApproval.ApprovalStatus;
+
+//            _db.Update(staffLoan);
+
+//            var action = loanApproval.ApprovalStatus.ToString().StartsWith("Approved") ? "Approved" : "Declined";
+
+
+//            LoanApprovalStatusTracker loanApprovalStatusTracker = new LoanApprovalStatusTracker
+//            {
+//                Action = $"{action} By {username}",
+
+//                Comment = loanApproval.Comment,
+//                ApprovalDate = DateTime.Now,
+//                LoanApplicationId = loanApproval.LoanApplicationId,
+
+//            };
+//            await _db.loanApprovalStatusTrackers.AddAsync(loanApprovalStatusTracker);
+//            await _db.SaveChangesAsync();
+
+//            //TODO: Send email to SuperAdmin if Accepted by Disciplinary/Appraisal Department
+
+//            if (loanApproval.ApprovalStatus == ApprovalStatus.ApprovedByDisciplinary)
+//            {
+//                //Send an email to Appraise Department
+//            }
+//            if (loanApproval.ApprovalStatus == ApprovalStatus.ApprovedByAppraisal)
+//            {
+//                //Send  email to SuperAdmin Department
+//            }
+
+//            if (loanApproval.ApprovalStatus == ApprovalStatus.ApprovedBySuperAdmin)
+//            {
+//                //Undecided
+//            }
+
+//            if (loanApproval.ApprovalStatus == ApprovalStatus.DeclinedByDisciplinary || loanApproval.ApprovalStatus == ApprovalStatus.DeclinedByAppraisal || loanApproval.ApprovalStatus == ApprovalStatus.DeclinedBySuperAdmin)
+//            {
+//                //Send  email to User that the loan has been Declined.
+//            }
+//            return;
+//        }
+//        throw new Exception("Loan record not found");
+
+//    }
+//    catch (Exception ex)
+//    {
+
+//        throw new Exception("Error occur, cannot approve loan");
+//    }
+
+//}
+
+////Get list of loan status
+//public async Task<IEnumerable<LoanApplication>> GetAllLoanByApprovalStatus(ApprovalStatus approvalStatus)
+//{
+//    try
+//    {
+//        var loanApplications = await _db.LoanApplications.Where(x => x.ApprovalStatus == approvalStatus).ToListAsync();
+
+//        if (loanApplications != null)
+//        {
+//            return loanApplications;
+//        }
+//        throw new Exception("No record found");
+//    }
+//    catch (Exception ex)
+//    {
+
+//        throw new Exception(ex.Message);
+//    }
+
+//}
+
+////Get list of loan record by Id
+//public async Task<IEnumerable<LoanApprovalStatusTracker>> GetLoanApprovalRecord(int id)
+//{
+//    try
+//    {
+//        var loanRecords = await _db.loanApprovalStatusTrackers.Where(x => x.LoanApplicationId == id).ToListAsync();
+
+//        if (loanRecords != null)
+//        {
+//            return loanRecords;
+//        }
+//        throw new Exception("No record found");
+//    }
+//    catch (Exception ex)
+//    {
+
+//        throw new Exception(ex.Message);
+//    }
+//}
+
+//............................................
+
+//Loan approval/Get Staff loan Approval/Get list of loan status - CONTROLLER
+
+//[HttpPost("update-loan-approval-status")]
+//[ProducesResponseType(typeof(ResponseModel), 200)]
+//[ProducesResponseType(typeof(ResponseModel), 400)]
+//[ProducesResponseType(typeof(ResponseModel), 401)]
+//public async Task<IActionResult> UpdateLoanApprovalStatus([FromBody] LoanApprovalStatusTrackerModel trackerModel)
+//{
+//    if (!ModelState.IsValid)
+//    {
+//        return BadRequest(StandardResponse.BadRequest("Validation error", ModelState.SelectMany(x => x.Value.Errors)));
+//    }
+//    try
+//    {
+//        var identity = HttpContext.User.Identity as ClaimsIdentity;
+
+//        if (identity == null)
+//        {
+//            throw new UnauthorizedAccessException("User is not authorized");
+//        }
+
+//        var approvalName = identity.FindFirst("userName").Value;
+//        await _adminApproval.UpdateLoanApprovalStatus(trackerModel, approvalName);
+
+//        return Ok(StandardResponse.Ok("Loan record updated successfully", null));
+
+//    }
+//    catch (Exception ex)
+//    {
+
+//        return BadRequest(StandardResponse.BadRequest("Error occured", ex.Message));
+//    }
+
+//}
+
+
+//[HttpGet("loan-status")]
+//[ProducesResponseType(typeof(ResponseModel), 200)]
+//[ProducesResponseType(typeof(ResponseModel), 400)]
+//[ProducesResponseType(typeof(ResponseModel), 401)]
+//public async Task<IActionResult> GetAllLoanByApprovalStatus([FromQuery] ApprovalStatus status)
+//{
+//    try
+//    {
+//        var loans = await _adminApproval.GetAllLoanByApprovalStatus(status);
+//        return Ok(StandardResponse.Ok("Loans retrieved successfully", loans));
+//    }
+//    catch (Exception ex)
+//    {
+//        return BadRequest(StandardResponse.BadRequest("Error occured", ex.Message));
+//    }
+//}
+
+
+//[HttpGet("{id}/records")]
+//[ProducesResponseType(typeof(ResponseModel), 200)]
+//[ProducesResponseType(typeof(ResponseModel), 400)]
+//[ProducesResponseType(typeof(ResponseModel), 401)]
+//public async Task<IActionResult> GetLoanApprovalRecord(int id)
+//{
+//    try
+//    {
+//        var loans = await _adminApproval.GetLoanApprovalRecord(id);
+//        return Ok(StandardResponse.Ok("Loans record retrieved successfully", loans));
+//    }
+//    catch (Exception ex)
+//    {
+//        return BadRequest(StandardResponse.BadRequest("Error occured", ex.Message));
+//    }
+//}
 
 
