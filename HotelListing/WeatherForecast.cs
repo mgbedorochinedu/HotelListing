@@ -370,3 +370,51 @@ namespace HotelListing
 //}
 
 
+//.......................................................................................................................
+////Get staff users either by emailAddress or accountNumber or staffId - SERVICE
+///
+//Get staff users either by emailAddress or accountNumber
+//public async Task<IEnumerable<LoansDto>> GetStaffUser(string emailAddress, string accountNumber, string staffId)
+//{
+//    try
+//    {
+//        IQueryable<Loans> staffUsersQuery = _db.Loans;
+//        if (!string.IsNullOrEmpty(emailAddress))
+//        {
+//            staffUsersQuery = staffUsersQuery.Include(x => x.staffUser).Where(x => x.staffUser.Email.ToLower().Trim() == emailAddress.ToLower().Trim());
+
+//        }
+
+//        if (!string.IsNullOrEmpty(accountNumber))
+//        {
+//            staffUsersQuery = staffUsersQuery.Where(x => x.LoanApplication.Nuban.Trim() == accountNumber.Trim());
+//        }
+
+//        if (!string.IsNullOrEmpty(staffId))
+//        {
+//            staffUsersQuery = staffUsersQuery.Where(x => x.staffUser.StaffId.Trim() == staffId.Trim());
+//        }
+
+
+//        var staffUsers = await staffUsersQuery.ToListAsync();
+
+
+//        if (staffUsers == null || !staffUsers.Any())
+//        {
+//            return null;
+//        }
+
+
+//        return _mapper.Map<List<Loans>, List<LoansDto>>(staffUsers);
+
+//    }
+//    catch (Exception ex)
+//    {
+//        throw new Exception("An error occur");
+//    }
+
+//}
+
+//.......................................................................................................................
+
+
